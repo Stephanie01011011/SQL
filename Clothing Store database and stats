@@ -1,0 +1,16 @@
+//Create the table for my store that holds the inventory of the store.
+CREATE TABLE store(id INTEGER PRIMARY KEY,  name TEXT, color TEXT, price INTEGER, quantity INTEGER);
+
+//Add products to the table with their id, name, color, price, and quantity
+INSERT INTO store VALUES
+(1, "Shirt", "Red", 10, 5),
+(2, "Pants", "White", 15, 10),
+(3, "Tank top", "Blue", 7, 3),
+(4, "Socks", "Black", 4, 7),
+(5, "Glasses", "Yellow", 5, 8);
+
+//View all products in the table ordered by price (asc)
+SELECT * FROM store ORDER BY price;
+
+//View the sum of all of the products quantities in this table.
+SELECT SUM(quantity) from store;
