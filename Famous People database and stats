@@ -1,0 +1,52 @@
+/* Create table about famous people and what they do here */
+
+CREATE TABLE famous (ID INTEGER PRIMARY KEY AUTOINCREMENT, fullname TEXT, age INTEGER, job TEXT);
+
+INSERT INTO famous(fullname, age, job) VALUES ("Adam Driver", 39, "Actor");
+INSERT INTO famous(fullname, age, job) VALUES ("Pedro Pascal", 48, "Actor");
+INSERT INTO famous(fullname, age, job) VALUES ("Tom Hiddleston", 42, "Actor");
+INSERT INTO famous(fullname, age, job) VALUES ("Sarah J Maas", 37, "Writer");
+INSERT INTO famous(fullname, age, job) VALUES ("Taylor Swift", 33, "Singer");
+INSERT INTO famous(fullname, age, job) VALUES ("Donna Tartt", 59, "Writer");
+
+CREATE TABLE spouse (ID INTEGER PRIMARY KEY AUTOINCREMENT, fullname TEXT, famous_id integer);
+
+INSERT INTO spouse(fullname, famous_id) VALUES ("Joanne Tucker", 1);
+INSERT INTO spouse(fullname, famous_id) VALUES ("Zawe Ashton", 3);
+INSERT INTO spouse(fullname, famous_id) VALUES ("Josh Maas", 4);
+INSERT INTO spouse(fullname, famous_id) VALUES ("Neal Guma", 6);
+
+CREATE TABLE knownFor (ID INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, famous_id integer);
+
+INSERT INTO knownFor(name, famous_id) VALUES ("Star Wars", 1);
+INSERT INTO knownFor(name, famous_id) VALUES ("Star Wars", 2);
+INSERT INTO knownFor(name, famous_id) VALUES ("Avengers", 3);
+INSERT INTO knownFor(name, famous_id) VALUES ("ACOTAR", 4);
+INSERT INTO knownFor(name, famous_id) VALUES ("Blank Space", 5);
+INSERT INTO knownFor(name, famous_id) VALUES ("The Secret History", 6);
+
+/*Join Famous persons table and what they're known for table. Then only find famous 
+persons (full name) who are in Star Wars.*/
+
+SELECT famous.fullname, knownFor.name
+FROM famous
+JOIN knownFor
+ON famous.ID = knownFor.famous_id
+WHERE knownFor.name = "Star Wars";
+
+/*Find all famous people (full name) and their spouses (full name), do not include famous people without a spouse*/
+
+SELECT famous.fullname, spouse.fullname
+FROM famous
+JOIN spouse
+ON famous.ID = spouse.famous_id;
+
+/*Find all famous people (full name), their spouses (full name), and what they're 
+known for (name), including famous people without spouses.*/
+
+SELECT famous.fullname, spouse.fullname, knownFor.name
+FROM famous
+LEFT OUTER JOIN spouse
+ON famous.ID = spouse.famous_id
+JOIN knownFor
+ON famous.ID = knownfor.famous_id
