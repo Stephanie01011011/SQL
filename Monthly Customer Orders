@@ -48,3 +48,24 @@ LEFT JOIN BIT_DB.customers cus
 ON feb.orderID = cus.order_id
 WHERE feb.Quantity > 2
 AND length(orderID) = 6;
+
+/* Find order dates between the dates specified (02-13 & 02-18) */
+SELECT orderdate
+FROM BIT_DB.FebSales
+WHERE orderdate between '02/13/19 00:00' AND '02/18/19 00:00';
+
+/* Find locations where order date is a specific date (02-18-19) at a certain time (01:35) */
+SELECT location
+FROM BIT_DB.FebSales 
+WHERE orderdate = '02/18/19 01:35';
+
+/* Find the total amount of items sold at a certain date (02-18-19) but at any time that day*/
+SELECT sum(quantity)
+FROM BIT_DB.FebSales 
+WHERE orderdate like '02/18/19%';
+
+/* Find all the products sold in Los Angeles in February, and include how many of each were sold */
+SELECT Product, SUM(Quantity)
+FROM BIT_DB.FebSales
+WHERE location like '%Los Angeles%'
+GROUP BY Product;
