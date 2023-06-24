@@ -1,0 +1,65 @@
+/* For this project, I downloaded Spotify data from Kaggle, then created a table to insert 
+Spotify data into. Once the table was created and data inserted I performed queries to gather
+information. */
+
+#Creating the table: 
+CREATE TABLE BIT_DB.Spotifydata (
+id integer PRIMARY KEY,
+artist_name varchar NOT NULL,
+track_name varchar NOT NULL,
+track_id varchar NOT NULL,
+popularity integer NOT NULL,
+danceability decimal(4,3) NOT NULL,
+energy decimal(4,3) NOT NULL,
+key integer NOT NULL,
+loudness decimal(5,3) NOT NULL,
+mode integer NOT NULL,
+speechiness decimal(5,4) NOT NULL,
+acousticness decimal(6,5) NOT NULL,
+instrumentalness text NOT NULL,
+liveness decimal(5,4) NOT NULL,
+valence decimal(4,3) NOT NULL,
+tempo decimal(6,3) NOT NULL,
+duration_ms integer NOT NULL,
+time_signature integer NOT NULL 
+)
+
+#Imported data from csv file.
+
+#Find which artists show up more than once on the top 50 list
+SELECT artist_name, COUNT(artist_name)
+FROM BIT_DB.Spotifydata
+GROUP BY artist_name
+HAVING COUNT(artist_name) > 1;
+
+# Find which song is the shortest recorded
+SELECT track_name, artist_name, duration_ms
+FROM BIT_DB.Spotifydata
+ORDER BY duration_ms
+LIMIT 1;
+
+# Find which song is the longest recorded
+SELECT track_name, artist_name, duration_ms
+FROM BIT_DB.Spotifydata
+ORDER BY duration_ms DESC
+LIMIT 1;
+
+# Find how many artists have 'the' in their name
+SELECT COUNT(DISTINCT artist_name)
+FROM BIT_DB.Spotifydata
+WHERE artist_name like '%The%' OR '%the%';
+
+# Find the 3 least popular songs
+SELECT artist_name, track_name
+FROM BIT_DB.Spotifydata
+ORDER BY popularity
+LIMIT 3;
+
+#Find average danceability for just the top 5 popular songs
+SELECT AVG(danceability)
+FROM BIT_DB.Spotifydata
+WHERE id IN (
+    SELECT id
+    FROM BIT_DB.Spotifydata
+    ORDER BY popularity 
+    LIMIT 5);
