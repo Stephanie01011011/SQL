@@ -1,0 +1,658 @@
+/* I created a database over a semester long course at my university where I was responsible for the concept of the DB, 
+ creating the architecture and adding the data pieces. I was then asked to query the database for the final project. The 
+ following is all of the code used to do this. 
+
+SQL Queries start at line 540. 
+*/
+
+--
+-- Table structure for table `Artist`
+--
+CREATE TABLE `Artist` (
+ `artistID` int(10) NOT NULL,
+ `fName` varchar(50) DEFAULT NULL,
+ `lName` varchar(50) DEFAULT NULL,
+ `ageAtDeath` int(10) DEFAULT NULL,
+ `locationID` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Artist`
+--
+INSERT INTO `Artist` (`artistID`, `fName`, `lName`, `ageAtDeath`, `locationID`)
+VALUES
+(100, 'Gustav', 'Klimt', 55, 300),
+(101, 'Alphonse', 'Mucha', 78, 301),
+(102, 'Aubrey', 'Beardsley', 25, 302),
+(103, 'Antoni', 'Gaudi', 73, 303),
+(104, 'Henri', 'Toulouse-Lautrec', 36, 304),
+(105, 'Louis', 'Tiffany', 84, 305),
+(106, 'Victor', 'Horta', 86, 306),
+(107, 'Emile', 'Galle', 58, 304),
+(108, 'Charles', 'Mackintosh', 60, 302),
+(109, 'Hector', 'Guimard', 75, 304),
+(110, 'Rene', 'Lalique', 85, 304),
+(111, 'Artist Unknown', 'Artist Unknown', NULL, 303);
+--
+-- Triggers `Artist`
+--
+DELIMITER $$
+CREATE TRIGGER `artist_before_insert` BEFORE INSERT ON `Artist` FOR EACH ROW BEGIN
+IF NEW.fName is NULL
+THEN SET NEW.fName = 'Artist Unknown';
+END IF;
+IF NEW.lName is NULL
+THEN SET NEW.lName = 'Artist Unknown';
+END IF;
+END
+$$
+DELIMITER ;
+-- --------------------------------------------------------
+--
+-- Table structure for table `ArtistPainting`
+--
+CREATE TABLE `ArtistPainting` (
+ `artID` int(10) NOT NULL,
+ `artistID` int(10) NOT NULL,
+ `paintingID` int(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `ArtistPainting`
+--
+INSERT INTO `ArtistPainting` (`artID`, `artistID`, `paintingID`) VALUES
+(0, 100, 700),
+(1, 100, 701),
+(2, 100, 702),
+(3, 101, 703),
+(4, 101, 704),
+(5, 102, 705),
+(6, 102, 706),
+(7, 102, 707),
+(8, 103, 708),
+(9, 104, 709),
+(10, 104, 710),
+(11, 104, 711),
+(12, 104, 712),
+(13, 105, 713),
+(14, 106, 714),
+(15, 107, 715),
+(16, 107, 716),
+(17, 108, 717),
+(18, 109, 718),
+(19, 110, 719),
+(20, 110, 720);
+-- --------------------------------------------------------
+--
+-- Stand-in structure for view `ArtistTitle`
+-- (See below for the actual view)
+--
+CREATE TABLE `ArtistTitle` (
+`fName` varchar(50)
+,`lName` varchar(50)
+,`title` varchar(100)
+);
+-- --------------------------------------------------------
+--
+-- Table structure for table `Country`
+--
+CREATE TABLE `Country` (
+ `countryID` int(10) NOT NULL,
+ `countryName` varchar(60) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Country`
+--
+INSERT INTO `Country` (`countryID`, `countryName`) VALUES
+(200, 'Austria'),
+(201, 'Czechia'),
+(202, 'United Kingdom'),
+(203, 'Spain'),
+(204, 'France'),
+(205, 'United States'),
+(206, 'Belgium'),
+(208, 'Japan'),
+(209, 'Scotland');
+-- --------------------------------------------------------
+--
+-- Table structure for table `Event`
+--
+CREATE TABLE `Event` (
+ `eventID` int(10) NOT NULL,
+ `eventName` varchar(100) NOT NULL,
+ `locationID` int(10) NOT NULL,
+ `date` date NOT NULL,
+ `artistID` int(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Event`
+--
+INSERT INTO `Event` (`eventID`, `eventName`, `locationID`, `date`, `artistID`)
+VALUES
+(2000, 'Dive Into Klimt\'s Work', 318, '2024-01-22', 100),
+(2001, 'Lalique Alive', 317, '2024-03-05', 110),
+(2002, 'Mucha 3D Show', 323, '2024-07-17', 101),
+(2003, 'Life Of Tiffany', 323, '2024-12-09', 105),
+(2004, 'Art In France', 325, '2025-05-01', 104);
+-- --------------------------------------------------------
+--
+-- Table structure for table `Genre`
+--
+CREATE TABLE `Genre` (
+ `genreID` int(10) NOT NULL,
+ `genreName` varchar(50) NOT NULL,
+ `startYear` int(20) NOT NULL,
+ `endYear` int(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Genre`
+--
+INSERT INTO `Genre` (`genreID`, `genreName`, `startYear`, `endYear`) VALUES
+(400, 'Art Nouveau', 1890, 1914),
+(401, 'Impressionism', 1860, 1886),
+(402, 'Surrealism', 1924, 1996),
+(403, 'Romanticism', 1798, 1837),
+(404, 'Early Gothic', 1150, 1250),
+(405, 'High Gothic', 1250, 1375);
+-- --------------------------------------------------------
+--
+-- Table structure for table `Location`
+--
+CREATE TABLE `Location` (
+ `locationID` int(10) NOT NULL,
+ `address` varchar(100) DEFAULT NULL,
+ `countryID` int(10) DEFAULT NULL,
+ `stateID` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Location`
+--
+INSERT INTO `Location` (`locationID`, `address`, `countryID`, `stateID`) VALUES
+(300, NULL, 200, NULL),
+(301, NULL, 201, NULL),
+(302, NULL, 202, NULL),
+(303, NULL, 203, NULL),
+(304, NULL, 204, NULL),
+(305, NULL, 205, NULL),
+(306, NULL, 206, NULL),
+(308, NULL, 208, NULL),
+(309, NULL, 209, NULL),
+(310, '902 Sunny Road', 205, 803),
+(311, '7896 West Drive', 205, 809),
+(312, 'San Andrés 76', 203, NULL),
+(313, '86 Rue La Boétie', 204, NULL),
+(314, '9034 Terry Lane', 205, 805),
+(315, 'Prinz-Eugen-Straße 27', 200, NULL),
+(316, 'Museumsplatz 1', 200, NULL),
+(317, '2110 Blue Ridge Road', 205, 801),
+(318, '700 N Art Museum Drive', 205, 812),
+(319, 'Elm Drive', 205, 802),
+(320, 'Private Collection', NULL, NULL),
+(321, '1000 5th Avenue', 205, 800),
+(322, '111 S Michigan Avenue', 205, 803),
+(323, '1 Rue De La Legion d\'Honneur', 204, NULL),
+(324, '9-7 West Lake', 208, NULL),
+(325, '200 N Arthur Ashe Boulevard', 205, 804),
+(326, '1 Museum Way', 205, 800),
+(327, '75001', 204, NULL),
+(328, 'Rue Paul-Emile Janson', 206, NULL);
+-- --------------------------------------------------------
+--
+-- Table structure for table `Material`
+--
+CREATE TABLE `Material` (
+ `materialID` int(10) NOT NULL,
+ `materialName` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Material`
+--
+INSERT INTO `Material` (`materialID`, `materialName`) VALUES
+(600, 'oil paint'),
+(601, 'acrylic paint'),
+(602, 'metal'),
+(603, 'iron'),
+(604, 'ceramics'),
+(605, 'glass'),
+(606, 'charcoal'),
+(607, 'poster'),
+(608, 'line block print'),
+(609, 'stone'),
+(610, 'wood'),
+(611, 'enamel');
+-- --------------------------------------------------------
+--
+-- Table structure for table `Museum`
+--
+CREATE TABLE `Museum` (
+ `museumID` int(10) NOT NULL,
+ `museumName` varchar(60) NOT NULL,
+ `museumLocation` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Museum`
+--
+INSERT INTO `Museum` (`museumID`, `museumName`, `museumLocation`) VALUES
+(900, 'Austrian Gallery Belvedere', 315),
+(901, 'Leopold Museum', 316),
+(902, 'The North Carolina Museum Of Art', 317),
+(903, 'Milwaukee Art Museum', 318),
+(904, 'Princeton Universoty Art Museum', 319),
+(905, 'Private Collection', 320),
+(906, 'The Metropolitan Museum Of Art', 321),
+(907, 'The Art Institute Of Chicago', 322),
+(908, 'Musee d\'Orsay', 323),
+(909, 'The Louvre', 327),
+(910, 'Suntory Museum Of Art', 324),
+(911, 'Virginia Museum Of Fine Arts', 325),
+(912, 'Corning Museum Of Glass', 326);
+-- --------------------------------------------------------
+--
+-- Stand-in structure for view `MuseumLocation`
+-- (See below for the actual view)
+--
+CREATE TABLE `MuseumLocation` (
+`title` varchar(100)
+,`museumName` varchar(60)
+);
+-- --------------------------------------------------------
+--
+-- Table structure for table `Painting`
+--
+CREATE TABLE `Painting` (
+ `paintingID` int(10) NOT NULL,
+ `title` varchar(100) NOT NULL,
+ `yearFinished` int(20) NOT NULL,
+ `subjectID` int(10) DEFAULT NULL,
+ `materialID` int(10) NOT NULL,
+ `locationID` int(10) DEFAULT NULL,
+ `museumID` int(10) DEFAULT NULL,
+ `genreID` int(10) NOT NULL,
+ `description` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Painting`
+--
+INSERT INTO `Painting` (`paintingID`, `title`, `yearFinished`, `subjectID`,
+`materialID`, `locationID`, `museumID`, `genreID`, `description`) VALUES
+(700, 'The Kiss', 1908, 502, 600, 300, 900, 400, 'painting'),
+(701, 'Lady With Fan', 1918, 500, 600, 300, 900, 400, 'painting'),
+(702, 'Death And Life', 1915, 502, 600, 300, 901, 400, 'painting'),
+(703, 'Daydream', 1897, 500, 607, 304, 902, 400, 'illustration'),
+(704, 'Job', 1896, 500, 607, 304, 903, 400, 'illustration'),
+(705, 'The Climax', 1893, 500, 606, 302, 904, 400, 'illustration'),
+(706, 'The Dancers Reward', 1894, 500, 606, 302, 905, 400, 'illustration'),
+(707, 'The Black Cape', 1894, 500, 608, 302, 906, 400, 'illustration'),
+(708, 'Floor Tiles For Casa Mila', 1906, 503, 604, 303, NULL, 400, 'architecture'),
+(709, 'At The Moulin Rouge', 1895, 502, 600, 304, 907, 400, 'painting'),
+(710, 'In Bed', 1893, 502, 600, 304, 908, 400, 'painting'),
+(711, 'La Toilette', 1889, 500, 600, 304, 908, 400, 'painting'),
+(712, 'Jane Avril Dansant', 1892, 500, 600, 304, 909, 400, 'painting'),
+(713, 'Tiffany Vase', 1900, 504, 605, 305, 906, 400, 'decoration'),
+(714, 'Hotel Tassel', 1893, 506, 609, 306, NULL, 400, 'architecture'),
+(715, 'Inky Cap Lamp', 1904, 505, 605, 308, 910, 400, 'decoration'),
+(716, 'Dragonfly Lamp', 1900, 505, 605, 304, 910, 400, 'decoration'),
+(717, 'High Backed Chair', 1898, 506, 610, 309, 908, 400, 'furniture'),
+(718, 'Bench For A Smoking Parlour', 1897, 506, 610, 304, 908, 400, 'furniture'),
+(719, 'Sea Horse Brooch', 1905, 504, 611, 304, 911, 400, 'decoration'),
+(720, 'Monnaie Du Pape', 1914, 505, 605, 304, 912, 400, 'decoration');
+-- --------------------------------------------------------
+--
+-- Table structure for table `State`
+--
+CREATE TABLE `State` (
+ `stateID` int(10) NOT NULL,
+ `name` varchar(100) NOT NULL,
+ `zip` varchar(20) NOT NULL,
+ `notes` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `State`
+--
+INSERT INTO `State` (`stateID`, `name`, `zip`, `notes`) VALUES
+(800, 'NY', '10012', NULL),
+(801, 'NC', '27220', NULL),
+(802, 'NJ', '08405', NULL),
+(803, 'IL', '60629', NULL),
+(804, 'VA', '22193', NULL),
+(805, 'IN', '46250', NULL),
+(806, 'WA', '98001', NULL),
+(807, 'MI', '48933', NULL),
+(808, 'AL', '36104', NULL),
+(809, 'CO', '80202', NULL),
+(810, 'FL', '32301', NULL),
+(811, 'CA', '90210', NULL),
+(812, 'WI', '53059', NULL);
+-- --------------------------------------------------------
+--
+-- Table structure for table `Subject`
+--
+CREATE TABLE `Subject` (
+ `subjectID` int(10) NOT NULL,
+ `subjectType` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `Subject`
+--
+INSERT INTO `Subject` (`subjectID`, `subjectType`) VALUES
+(500, 'Female'),
+(501, 'Male'),
+(502, 'Female and Male'),
+(503, 'Animal'),
+(504, 'Objects'),
+(505, 'Nature'),
+(506, 'No Subject');
+-- --------------------------------------------------------
+--
+-- Table structure for table `User`
+--
+CREATE TABLE `User` (
+ `userID` int(10) NOT NULL,
+ `fName` varchar(60) NOT NULL,
+ `lName` varchar(60) NOT NULL,
+ `username` varchar(60) NOT NULL,
+ `password` varchar(15) NOT NULL,
+ `email` varchar(60) NOT NULL,
+ `phone` varchar(20) NOT NULL,
+ `locationID` int(10) NOT NULL,
+ `favorites` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+--
+-- Dumping data for table `User`
+--
+INSERT INTO `User` (`userID`, `fName`, `lName`, `username`, `password`, `email`,
+`phone`, `locationID`, `favorites`) VALUES
+(1000, 'Stephanie', 'Livengood', 'srlive', 'artluvr101', 'sreneelive@gmail.com',
+'4632468451', 311, '{\r\n“Artists”: [\r\n“Gustav Klimt”, “Alphons Mucha”\r\n],\r\
+n“Paintings”: [\r\n“The Kiss”\r\n]\r\n}\r\n'),
+(1001, 'Adam', 'Driver', 'adriver', 'artisbeautiful', 'adriver@gmail.com',
+'7658880560', 312, '{\r\n“Artists”: [\r\n“Gustav Klimt”, “Louis Tiffany”\r\n]\r\n}\
+r\n'),
+(1002, 'Alex', 'Bond', 'abond', 'paintmylife', 'abond@gmail.com', '5018997656',
+313, '{\r\n“Artists”: \r\n[“Alphonse Mucha”],\r\n“Paintings”: [\r\n“Daydream”\r\n]\
+r\n}\r\n'),
+(1003, 'Riley', 'James', 'rjames', 'paintingwrld', 'rjames@gmail.com',
+'7098776251', 314, '{\r\n“Artists”: [\r\n“Rene Lalique”, “Alphonse
+Mucha”, \"Charles Mackintosh\"\r\n],\r\n“Paintings”: [\r\n“Jane Avril
+Dansant”, \"Hotel Tassel\"\r\n]\r\n}\r\n'),
+(1004, 'Anastasia', 'Renee', 'arenee', 'drawlife', 'arenee@gmail.com',
+'4635551276', 311, NULL);
+-- --------------------------------------------------------
+--
+-- Structure for view `ArtistTitle`
+--
+DROP TABLE IF EXISTS `ArtistTitle`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`slivengo`@`localhost` SQL SECURITY DEFINER VIEW
+`ArtistTitle` AS select `Artist`.`fName` AS `fName`,`Artist`.`lName` AS
+`lName`,`Painting`.`title` AS `title` from ((`Artist` join `ArtistPainting`
+on(`Artist`.`artistID` = `ArtistPainting`.`artistID`)) join `Painting`
+on(`Painting`.`paintingID` = `ArtistPainting`.`paintingID`)) ;
+-- --------------------------------------------------------
+--
+-- Structure for view `MuseumLocation`
+--
+DROP TABLE IF EXISTS `MuseumLocation`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`slivengo`@`localhost` SQL SECURITY DEFINER VIEW
+`MuseumLocation` AS select `Painting`.`title` AS `title`,`Museum`.`museumName` AS
+`museumName` from (`Painting` join `Museum` on(`Painting`.`museumID` =
+`Museum`.`museumID`)) ;
+--
+-- Indexes for dumped tables
+--
+--
+-- Indexes for table `Artist`
+--
+ALTER TABLE `Artist`
+ ADD PRIMARY KEY (`artistID`),
+ ADD KEY `locationID` (`locationID`);
+--
+-- Indexes for table `ArtistPainting`
+--
+ALTER TABLE `ArtistPainting`
+ ADD PRIMARY KEY (`artID`),
+ ADD KEY `artistID` (`artistID`),
+ ADD KEY `paintingID` (`paintingID`);
+--
+-- Indexes for table `Country`
+--
+ALTER TABLE `Country`
+ ADD PRIMARY KEY (`countryID`);
+--
+-- Indexes for table `Event`
+--
+ALTER TABLE `Event`
+ ADD PRIMARY KEY (`eventID`),
+ ADD KEY `locationID` (`locationID`),
+ ADD KEY `artistID` (`artistID`);
+--
+-- Indexes for table `Genre`
+--
+ALTER TABLE `Genre`
+ ADD PRIMARY KEY (`genreID`);
+--
+-- Indexes for table `Location`
+--
+ALTER TABLE `Location`
+ ADD PRIMARY KEY (`locationID`),
+ ADD KEY `stateID` (`stateID`),
+ ADD KEY `countryID` (`countryID`);
+--
+-- Indexes for table `Material`
+--
+ALTER TABLE `Material`
+ ADD PRIMARY KEY (`materialID`);
+--
+-- Indexes for table `Museum`
+--
+ALTER TABLE `Museum`
+ ADD PRIMARY KEY (`museumID`),
+ ADD KEY `museumLocation` (`museumLocation`);
+--
+-- Indexes for table `Painting`
+--
+ALTER TABLE `Painting`
+ ADD PRIMARY KEY (`paintingID`),
+ ADD KEY `genreID` (`genreID`),
+ ADD KEY `materialID` (`materialID`),
+ ADD KEY `museumID` (`museumID`),
+ ADD KEY `locationID` (`locationID`),
+ ADD KEY `subjectID` (`subjectID`);
+--
+-- Indexes for table `State`
+--
+ALTER TABLE `State`
+ ADD PRIMARY KEY (`stateID`);
+--
+-- Indexes for table `Subject`
+--
+ALTER TABLE `Subject`
+ ADD PRIMARY KEY (`subjectID`);
+--
+-- Indexes for table `User`
+--
+ALTER TABLE `User`
+ ADD PRIMARY KEY (`userID`),
+ ADD KEY `locationID` (`locationID`);
+--
+-- Constraints for dumped tables
+--
+--
+-- Constraints for table `Artist`
+--
+ALTER TABLE `Artist`
+ ADD CONSTRAINT `Artist_ibfk_1` FOREIGN KEY (`locationID`) REFERENCES `Location`
+(`locationID`);
+--
+-- Constraints for table `ArtistPainting`
+--
+ALTER TABLE `ArtistPainting`
+ ADD CONSTRAINT `ArtistPainting_ibfk_1` FOREIGN KEY (`artistID`) REFERENCES
+`Artist` (`artistID`),
+ ADD CONSTRAINT `ArtistPainting_ibfk_2` FOREIGN KEY (`paintingID`) REFERENCES
+`Painting` (`paintingID`);
+--
+-- Constraints for table `Event`
+--
+ALTER TABLE `Event`
+ ADD CONSTRAINT `Event_ibfk_1` FOREIGN KEY (`locationID`) REFERENCES `Location`
+(`locationID`),
+ ADD CONSTRAINT `Event_ibfk_2` FOREIGN KEY (`artistID`) REFERENCES `Artist`
+(`artistID`);
+--
+-- Constraints for table `Location`
+--
+ALTER TABLE `Location`
+ ADD CONSTRAINT `Location_ibfk_1` FOREIGN KEY (`stateID`) REFERENCES `State`
+(`stateID`),
+ ADD CONSTRAINT `Location_ibfk_2` FOREIGN KEY (`countryID`) REFERENCES `Country`
+(`countryID`);
+--
+-- Constraints for table `Museum`
+--
+ALTER TABLE `Museum`
+ ADD CONSTRAINT `Museum_ibfk_1` FOREIGN KEY (`museumLocation`) REFERENCES
+`Location` (`locationID`);
+--
+-- Constraints for table `Painting`
+--
+ALTER TABLE `Painting`
+ ADD CONSTRAINT `Painting_ibfk_1` FOREIGN KEY (`genreID`) REFERENCES `Genre`
+(`genreID`),
+ ADD CONSTRAINT `Painting_ibfk_2` FOREIGN KEY (`materialID`) REFERENCES `Material`
+(`materialID`),
+ ADD CONSTRAINT `Painting_ibfk_3` FOREIGN KEY (`museumID`) REFERENCES `Museum`
+(`museumID`),
+ ADD CONSTRAINT `Painting_ibfk_4` FOREIGN KEY (`locationID`) REFERENCES `Location`
+(`locationID`),
+ ADD CONSTRAINT `Painting_ibfk_5` FOREIGN KEY (`subjectID`) REFERENCES `Subject`
+(`subjectID`);
+--
+-- Constraints for table `User`
+--
+ALTER TABLE `User`
+ ADD CONSTRAINT `User_ibfk_1` FOREIGN KEY (`locationID`) REFERENCES `Location`
+(`locationID`);
+COMMIT;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+// Queries Begin
+
+//I first needed to create two views for the assignment which made it easier to get a common piece of information from the data
+
+CREATE VIEW ArtistTitle AS
+SELECT Artist.fName, Artist.lName, Painting.title
+FROM Artist
+JOIN ArtistPainting
+ON Artist.artistID = ArtistPainting.artistID
+JOIN Painting
+ON Painting.paintingID = ArtistPainting.paintingID;
+
+CREATE VIEW MuseumLocation AS
+SELECT Painting.title, Museum.museumName
+FROM Painting
+JOIN Museum
+ON Painting.museumID = Museum.museumID;
+
+/*I created a trigger to change an artists name to unknown
+artist if no name is given. */
+
+DELIMITER $$
+CREATE TRIGGER artist_before_insert
+BEFORE INSERT ON Artist
+FOR EACH ROW
+BEGIN
+IF NEW.fName is NULL
+THEN SET NEW.fName = 'Artist Unknown';
+END IF;
+IF NEW.lName is NULL
+THEN SET NEW.lName = 'Artist Unknown';
+END IF;
+END $$
+DELIMITER ;
+
+/* My first query joins two tables to show what material type was used
+for each piece of art.*/
+
+SELECT Painting.title, Material.materialName
+FROM Painting
+JOIN Material
+on Painting.materialID = Material.materialID;
+
+/* The second query joins 4 tables. It joins the
+artist and painting table together throughout the artistpainting table to
+show painting title and artists last name, as well as joins the subject
+table to show the subject of each painting. I narrowed it down to only
+paintings with female subjects
+*/
+
+SELECT Painting.title, Artist.lName, Subject.subjectType
+FROM Painting
+JOIN ArtistPainting
+ON Painting.paintingID = ArtistPainting.paintingID
+JOIN Artist
+ON ArtistPainting.artistID = Artist.artistID
+JOIN Subject
+ON Painting.subjectID = Subject.subjectID
+WHERE Subject.subjectType = 'Female';
+
+/* I used the AVG function to find the average age of these artists when
+they died. This could be used later when adding artists from other time
+periods to see life span of different genres of painters */
+
+SELECT AVG(Artist.ageAtDeath) as AverageAgeAtDeath
+FROM Artist;
+
+/*I used the count function to find how many distinct locations are used in the paintings
+table. We can compare this to how many locations there are in the
+locations table to see if there is a pattern for where artwork is made or
+if it is more diverse. */
+
+SELECT COUNT(DISTINCT locationID) as locations
+FROM Painting;
+
+/*This query shows the names of artists that were over 50 and live in a
+specific country (US).
+*/
+
+SELECT fName, lName
+FROM Artist
+JOIN Location
+ON Artist.locationID = Location.locationID
+WHERE ageAtDeath > 50 AND Location.countryID = 205;
+
+/*This query will find the events taking place between January and May
+of 2024.
+*/
+
+SELECT eventName, date
+FROM Event
+WHERE date BETWEEN '2024-01-01' AND '2024-05-01';
+
+/* This query shows the paintings in ascending order by yearFinished */
+
+SELECT title, yearFinished
+FROM Painting
+ORDER BY yearFinished ASC
+LIMIT 1;
+
+/*One of the questions I wanted to answer with this database to see the
+more popular year for paintings during this time frame. I used this
+query to do this by grouping the paintings by year finished and then
+ordering by the count from largest number to smallest. */
+
+SELECT yearFinished, COUNT(yearFinished) as Count
+FROM Painting
+GROUP BY yearFinished
+order by Count DESC;
+
+/*This query finds all users in the database who are from America. This can be helpful
+when sending out invites from museums located within the US */
+
+SELECT User.fName, User.lName
+FROM User
+JOIN Location
+ON User.locationID = Location.locationID
+JOIN Country
+ON Location.countryID = Country.countryID
+WHERE Country.countryID = 205;
