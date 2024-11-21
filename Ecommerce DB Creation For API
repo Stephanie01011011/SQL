@@ -1,0 +1,347 @@
+-- use newly created LaFemmeDatabase
+
+USE LaFemmeDatabase;
+GO
+
+-- create schema
+CREATE SCHEMA LaFemmeAppSchema;
+GO
+
+-- create first table for users
+
+CREATE TABLE LaFemmeAppSchema.Users (
+    UserId INT IDENTITY(1,1),
+    FirstName NVARCHAR(50),
+    LastName NVARCHAR(50),
+    BirthMonth NVARCHAR(50),
+    BirthDay NVARCHAR(10),
+    BirthYear NVARCHAR(10),
+    City NVARCHAR(50),
+    StateAbbr NVARCHAR(10),
+    ZipCode NVARCHAR(50),
+    Email NVARCHAR(50)
+);
+
+-- insert first row of data into users for testing
+
+INSERT INTO LaFemmeAppSchema.Users (
+    FirstName, LastName, BirthMonth, BirthDay, BirthYear, City, StateAbbr, ZipCode, Email
+) VALUES(
+    'Stephanie', 'Livengood', 'December', '5', '1991', 'Indianapolis', 'IN', '46250', 'sreneelive@gmail.com'
+);
+
+SELECT * FROM LaFemmeAppSchema.Users;
+
+-- create items table
+
+CREATE TABLE LaFemmeAppSchema.Items (
+    ItemId INT IDENTITY(1,1),
+    ItemName NVARCHAR(50),
+    ItemPrice DECIMAL(6,2),
+    ItemDescription NVARCHAR(250),
+    Colors NVARCHAR(250),
+    ItemSizing NVARCHAR(250),
+    ItemType NVARCHAR(50)
+);
+
+-- add column I thought would be important for data display on website
+
+ALTER TABLE LaFemmeAppSchema.Items 
+ADD ItemImageUrl VARCHAR(250);
+
+-- create cart table
+
+CREATE TABLE LaFemmeAppSchema.Cart (
+    CartId INT IDENTITY(1,1),
+    UserId INT
+);
+
+-- insert first record for cart to test
+
+INSERT INTO LaFemmeAppSchema.Cart(
+    UserId
+) VALUES(
+    1
+);
+
+SELECT * FROM LaFemmeAppSchema.Cart;
+
+-- add missing columns for login abilities
+
+ALTER TABLE LaFemmeAppSchema.Users 
+ADD Password VARCHAR(50);
+ALTER TABLE LaFemmeAppSchema.Users 
+ADD ConfirmPassword VARCHAR(50);
+
+select * from LaFemmeAppSchema.Users;
+
+-- update password and confirm password to already inserted values so not null, for testing
+
+UPDATE LaFemmeAppSchema.Users
+SET ConfirmPassword = 'newpassword'
+WHERE ConfirmPassword IS NULL;
+
+UPDATE LaFemmeAppSchema.Users
+SET Password = 'newpassword'
+WHERE Password IS NULL;
+
+-- create reviews table
+
+CREATE TABLE LaFemmeAppSchema.Reviews (
+    ReviewId INT IDENTITY(1,1),
+    UserId INT,
+    ItemId INT,
+    ReviewBody NVARCHAR(250),
+    CreatedDate DATETIME,
+    UpdatedDate DATETIME
+);
+
+-- create auth table for login and registration
+
+CREATE TABLE LaFemmeAppSchema.Auth (
+    Email VARCHAR(50),
+    PasswordHash VARBINARY(MAX),
+    PasswordSalt VARBINARY(MAX),
+   
+);
+
+-- insert a new row into items, for testing
+
+INSERT INTO LaFemmeAppSchema.Items(
+    ItemName, ItemPrice, ItemDescription, Colors, ItemSizing, ItemType, ItemImageUrl, CartId
+) VALUES(
+    'Mary Jane Loafers', 67.99, 'Heeled shoes for work or the after party.', 'black, red, white', '6,7,8,9,10', 'Shoes', 'no url', 1
+);
+
+-- insert a couple reviews to test association with items table
+
+INSERT INTO LaFemmeAppSchema.Reviews(
+    UserId, ItemId, ReviewBody, CreatedDate, UpdatedDate
+) VALUES(
+    1, 1, 'I love these shoes so much', GETDATE(), GETDATE()
+);
+
+INSERT INTO LaFemmeAppSchema.Reviews(
+    UserId, ItemId, ReviewBody, CreatedDate, UpdatedDate
+) VALUES(
+    1, 2, 'I love these pants so much', GETDATE(), GETDATE()
+);
+
+SELECT * FROM LaFemmeAppSchema.Items
+WHERE CartId = 1;
+
+-- insert new item to make sure reviews are associated correctly
+
+INSERT INTO LaFemmeAppSchema.Items(
+    ItemName, ItemPrice, ItemDescription, Colors, ItemSizing, ItemType, ItemImageUrl, CartId
+) VALUES(
+    'High Rise Baggy Jeans', 32.99, 'Relaxed look for the everyday action', 'blue', '00, 0, 1, 2, 3, 4, 5, 6', 'Pants', 'no url', 1
+);
+
+-- view reviews with user info accompanying them
+
+SELECT * 
+FROM LaFemmeAppSchema.Reviews Rev
+LEFT JOIN LaFemmeAppSchema.Users us
+ON Rev.UserId = us.UserId;
+
+
+
+-- stored procedures
+GO
+
+-- stored procedure for getting all the users. Can also filter by userId to get one specific user.
+
+CREATE OR ALTER PROCEDURE LaFemmeAppSchema.spUsers_Get
+/*EXEC LaFemmeAppSchema.spUsers_Get @UserId=2001*/
+    @UserId INT = NULL
+AS 
+BEGIN
+    SELECT [Cart].[CartId],
+    [Users].[UserId],
+    [Users].[FirstName],
+    [Users].[LastName],
+    [Users].[BirthMonth],
+    [Users].[BirthDay],
+    [Users].[BirthYear],
+    [Users].[City],
+    [Users].[StateAbbr],
+    [Users].[ZipCode],
+    [Users].[Email]
+    FROM LaFemmeAppSchema.Users users
+    LEFT JOIN LaFemmeAppSchema.Cart cart
+    ON users.UserId = cart.UserId
+    WHERE Users.UserId = ISNULL(@UserId, Users.UserId)
+END
+
+GO
+
+-- stored procedure to get all reviews for each item or by each user.
+
+CREATE OR ALTER PROCEDURE LaFemmeAppSchema.spReviews_Get
+/*EXEC TutorialAppSchema.spUsers_Get @UserId=2001*/
+    @UserId INT = NULL,
+    @ItemId INT = NULL
+AS 
+BEGIN
+    IF(@UserId IS NOT NULL OR @UserId != '')
+        BEGIN
+            SELECT [ReviewId],
+            reviews.UserId,
+            [ItemId],
+            [ReviewBody],
+            [CreatedDate],
+            [UpdatedDate], users.FirstName, users.LastName, users.Email
+            FROM LaFemmeAppSchema.Reviews reviews
+            LEFT JOIN LaFemmeAppSchema.Users users
+            ON reviews.UserId = users.UserId
+            WHERE reviews.UserId = @UserId
+        END
+    ELSE
+        BEGIN
+            SELECT [ReviewId],
+            reviews.UserId,
+            [ItemId],
+            [ReviewBody],
+            [CreatedDate],
+            [UpdatedDate], users.FirstName, users.LastName, users.Email
+            FROM LaFemmeAppSchema.Reviews reviews
+            LEFT JOIN LaFemmeAppSchema.Users users
+            ON reviews.UserId = users.UserId
+            WHERE reviews.ItemId = @ItemId
+        END
+END
+
+GO
+
+-- stored procedure for updating and inserting a new registered user.
+
+CREATE OR ALTER PROCEDURE LaFemmeAppSchema.spRegistration_Upsert
+    @Email NVARCHAR(50),
+    @PasswordHash VARBINARY(MAX),
+    @PasswordSalt VARBINARY(MAX)
+AS
+BEGIN
+    IF NOT EXISTS (SELECT * FROM LaFemmeAppSchema.Auth WHERE Email = @Email)
+        BEGIN
+            INSERT INTO LaFemmeAppSchema.Auth(
+                [Email],
+                [PasswordHash],
+                [PasswordSalt]
+            )VALUES(
+                @Email,
+                @PasswordHash,
+                @PasswordSalt
+            )
+        END
+    ELSE
+        BEGIN
+            UPDATE LaFemmeAppSchema.Auth
+            SET PasswordHash = @PasswordHash, PasswordSalt = @PasswordSalt
+            WHERE Email = @Email
+        END
+END
+
+GO
+
+SELECT * FROM LaFemmeAppSchema.Auth;
+
+GO
+
+-- stored procedure for getting passwordhash and salt for logged in users.
+
+CREATE OR ALTER PROCEDURE LaFemmeAppSchema.spLoginConfirmation_Get
+    @Email NVARCHAR(50)
+AS
+BEGIN
+    SELECT[Auth].[PasswordHash],
+    [Auth].[PasswordSalt] FROM LaFemmeAppSchema.Auth AS Auth
+        WHERE Auth.Email = @Email
+
+END
+
+
+GO
+
+-- stored procedure for getting all items. Can also filter by item id, item type, and item colors.
+
+CREATE OR ALTER PROCEDURE LaFemmeAppSchema.spItems_Get
+/*EXEC LaFemmeAppSchema.spItems_Get @ItemColor="red"*/
+    @ItemId INT = NULL,
+    @ItemType NVARCHAR(50) = NULL,
+    @ItemColor NVARCHAR(250) = NULL
+AS 
+BEGIN
+
+    IF(@ItemType IS NOT NULL)
+        IF(@ItemColor IS NOT NULL)
+            BEGIN
+                SELECT *
+                FROM LaFemmeAppSchema.Items
+                WHERE Items.ItemId = ISNULL(@ItemId, Items.ItemId) AND Items.ItemType = @ItemType AND Items.Colors LIKE '%' + @ItemColor + '%'
+
+            END
+        ELSE
+        BEGIN
+            SELECT *
+            FROM LaFemmeAppSchema.Items
+            WHERE Items.ItemId = ISNULL(@ItemId, Items.ItemId) AND Items.ItemType = @ItemType
+        END
+    ELSE
+    IF(@ItemColor IS NOT NULL)
+        BEGIN
+            SELECT *
+            FROM LaFemmeAppSchema.Items
+            WHERE Items.ItemId = ISNULL(@ItemId, Items.ItemId) AND Items.Colors LIKE  '%' + @ItemColor + '%';
+
+        END
+    ELSE
+        BEGIN
+            SELECT *
+            FROM LaFemmeAppSchema.Items
+            WHERE Items.ItemId = ISNULL(@ItemId, Items.ItemId)
+
+        END
+
+
+    
+END
+
+GO
+
+-- insert new cart row for testing
+
+INSERT INTO LaFemmeAppSchema.Cart(UserId, ItemId) VALUES (1, 2);
+
+-- get all item information as well as cart id for a specific user, testing
+
+SELECT [cart].[Amount]
+[items].[ItemId],
+[items].[ItemName],
+[items].[ItemPrice],
+[items].[ItemDescription],
+[items].[Colors],
+[items].[ItemSizing],
+[items].[ItemType] 
+FROM LaFemmeAppSchema.Items items
+LEFT JOIN LaFemmeAppSchema.Cart cart
+ON items.ItemId = cart.ItemId
+WHERE UserId = 1;
+
+-- dropped cartId, r4ealized it was unnecessary
+
+ALTER TABLE LaFemmeAppSchema.Items
+DROP COLUMN CartId;
+
+SELECT * FROM LaFemmeAppSchema.Items;
+
+-- update null values for amount to a value of 1, for testing
+
+UPDATE LaFemmeAppSchema.Cart
+SET Amount = 1
+WHERE Amount IS NULL;
+
+-- remove null item ids, so in the future they will not impact data analysis or display on the website.
+
+DELETE FROM LaFemmeAppSchema.Cart
+WHERE Cart.ItemId IS NULL;
